@@ -13,7 +13,6 @@ let historyPlayerNumber = [];// 変数playerNumberを代入する配列
 let playerDivisor = null;// playerが予想した約数を代入する変数
 let truePlayerDivisor = [];// 変数playerDivisorの内、変数numberDivisorに含まれる数を代入する配列
 let falsePlayerDivisor = [];// 変数playerDivisorの内、変数numberDivisorに含まれない数を代入する配列
-let currentRequest;//ゲームが現在要求する数字の種類
 
 function gameStart() {
     gameStatus = true;
@@ -27,8 +26,7 @@ function gameStart() {
     console.log(number);
     numberDivisor = findDivisor(number);
 
-    currentRequest = "divisor";
-    document.getElementById("currentRequest").innerHTML = "約数の予想を入力：";
+    document.getElementById("request").innerHTML = "約数または数字の予想を入力：";
     document.getElementById("information").innerHTML = "あなたの回答を待っています。";
 
     let cheatTool = document.getElementById("cheatTool").checked;
@@ -63,49 +61,26 @@ function sendNumber() {
     let inputNumber = parseInt(document.getElementById("inputNumber").value);
     document.getElementById("inputNumber").value = "";
 
-    if (gameStatus === true && !isNaN(inputNumber) && currentRequest === "divisor") { //約数の予想を求めている場合
+    if (gameStatus === true && !isNaN(inputNumber) && inputNumber !== number) { //入力すした数字が正解ではない場合
         playerDivisor = inputNumber;
 
         if (numberDivisor.includes(playerDivisor) === true) { //約数の予想が正しい場合
             document.getElementById("information").innerHTML = playerDivisor + "は約数です。";
 
             truePlayerDivisor.push(playerDivisor);
-            truePlayerDivisor = ascendingOrder(truePlayerDivisor);
+            truePlayerDivisor.sort((a, b) => a - b);
             document.getElementById("truePlayerDivisor").innerHTML = `約数である: ${truePlayerDivisor.join(', ')}`;
 
         } else if (numberDivisor.includes(playerDivisor) === false) { //約数の予想が間違っている場合
             document.getElementById("information").innerHTML = playerDivisor + "は約数ではありません。";
 
             falsePlayerDivisor.push(playerDivisor);
-            falsePlayerDivisor = ascendingOrder(falsePlayerDivisor);
+            falsePlayerDivisor.sort((a, b) => a - b);
             document.getElementById("falsePlayerDivisor").innerHTML = `約数ではない: ${falsePlayerDivisor.join(', ')}`;
         }
 
-        currentRequest = "number";
-        document.getElementById("currentRequest").innerHTML = "数字の予想を入力：";
-
-    } else if (gameStatus === true && !isNaN(inputNumber) && currentRequest === "number") { //数字の予想を求めている場合
-        playerNumber = inputNumber;
-        historyPlayerNumber.push(playerNumber);
-        historyPlayerNumber = ascendingOrder(historyPlayerNumber);
-        document.getElementById("historyPlayerNumber").innerHTML = `これまでの回答: ${historyPlayerNumber.join(', ')}`;
-
-        if (number !== playerNumber) { //数字の予想が間違っている場合
-            document.getElementById("information").innerHTML = playerNumber + "ではないです。";
-
-            let cheatTool = document.getElementById("cheatTool").checked;
-            if (cheatTool === true && playerNumber < number) { //チートが有効で数字が小さい場合
-                document.getElementById("cheatToolHint").innerHTML = "ヒント:答えは" + playerNumber + "より大きいです。";
-            } else if (cheatTool === true && playerNumber > number) { //チートが有効で数字が大きい場合
-                document.getElementById("cheatToolHint").innerHTML = "ヒント:答えは" + playerNumber + "より小さいです。";
-            }
-
-        } else if (number === playerNumber) { //数字の予想が正しい場合
-            gameSunset();
-        }
-
-        currentRequest = "divisor";
-        document.getElementById("currentRequest").innerHTML = "約数の予想を入力：";
+    } else if (gameStatus === true && !isNaN(inputNumber) && inputNumber === number) { //入力した数字が正しい場合
+        gameSunset();
 
     } else if (gameStatus === false) { // ゲームが実行されていない場合
         alert("ゲームが実行されていません。");
@@ -129,18 +104,6 @@ function findDivisor(n) {
 
     ret.sort((a, b) => a - b); // 昇順にソート
     return ret; // 約数の配列を返す
-}
-
-function ascendingOrder(arr) {
-    return arr.sort(function (first, second) {
-        if (first > second) {
-            return 1;
-        } else if (first < second) {
-            return -1;
-        } else {
-            return 0;
-        }
-    });
 }
 
 function convertMillisecondsToTime(milliseconds) {
